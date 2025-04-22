@@ -29,6 +29,32 @@ const foodSchema = new mongoose.Schema({
 
 const Food = mongoose.model("Food", foodSchema);
 
+const userSchema = new mongoose.Schema({
+  email: String,
+  password: String,
+  name: String,
+  number: String,
+  address: String,
+});
+
+const User = mongoose.model("User", userSchema);
+
+app.post("/api/user-register", async (req, res) => {
+  console.log("New userrrrrrrrrrrrrrrrr", req.body);
+  const newUsers = new User(req.body);
+  await newUsers.save();
+  res.json(newUsers);
+});
+
+app.post("/api/user-login", async (req, res) => {
+  const { email, password } = req.body;
+  const findUser = await User.findOne({ email, password });
+  if (!findUser) {
+    return res.status(401).json({ message: "Invalid credentials" });
+  }
+  res.json(findUser);
+});
+
 app.get("/api/foods", async (req, res) => {
   const foods = await Food.find();
   res.json(foods);
@@ -61,7 +87,9 @@ app.delete("/api/foods/:id", async (req, res) => {
 // app.listen(5000, () => console.log("Server running on port 5000"));
 const PORT = process.env.PORT || 5001;
 
-app.listen(PORT, () => console.log(`Server Running on ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running at: http://localhost:${PORT}`);
+});
 
 // Don't forget to create a .env file in backend directory:
 // MONGO_URI=your_mongodb_connection_string
