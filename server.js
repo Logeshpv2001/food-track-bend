@@ -72,7 +72,7 @@ app.post("/api/foods", async (req, res) => {
   res.json(newFood);
 });
 
-app.put("/api/foods/:id", async (req, res) => {
+app.patch("/api/foods/:id", async (req, res) => {
   const updatedFood = await Food.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
   });
