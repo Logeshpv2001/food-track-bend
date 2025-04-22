@@ -24,6 +24,7 @@ const foodSchema = new mongoose.Schema({
   eveningSnackCalories: String,
   night: String,
   nightCalories: String,
+  email: String,
   // calories: String,
 });
 
@@ -63,6 +64,11 @@ app.get("/api/foods", async (req, res) => {
 app.get("/api/foods/:id", async (req, res) => {
   const food = await Food.findById(req.params.id);
   res.json(food);
+});
+
+app.get("/api/foodsforusers/:email", async (req, res) => {
+  const foodforUsers = await Food.find({ email: req.params.email });
+  res.json(foodforUsers);
 });
 
 app.post("/api/foods", async (req, res) => {
