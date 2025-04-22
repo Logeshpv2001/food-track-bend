@@ -15,11 +15,16 @@ mongoose
 const foodSchema = new mongoose.Schema({
   date: String,
   morning: String,
+  morningCalories: String,
   morningSnack: String,
+  morningSnackCalories: String,
   afternoon: String,
+  afternoonCalories: String,
   eveningSnack: String,
+  eveningSnackCalories: String,
   night: String,
-  calories: String,
+  nightCalories: String,
+  // calories: String,
 });
 
 const Food = mongoose.model("Food", foodSchema);
@@ -35,6 +40,7 @@ app.get("/api/foods/:id", async (req, res) => {
 });
 
 app.post("/api/foods", async (req, res) => {
+  console.log("received data", req.body);
   const newFood = new Food(req.body);
   await newFood.save();
   res.json(newFood);
