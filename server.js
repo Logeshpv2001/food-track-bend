@@ -12,12 +12,17 @@ const app = express();
 const cors = require("cors");
 const verifyUser = require("./src/middleware/verifyUser");
 
-const corsOptions = {
-  origin: process.env.FRONTEND_URL, // Frontend URL (adjust if using a different port)
-  credentials: true, // Allow sending cookies and authorization headers
-};
+// const corsOptions = {
+//   origin: process.env.FRONTEND_URL, // Frontend URL (adjust if using a different port)
+//   credentials: true, // Allow sending cookies and authorization headers
+// };
 
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL, // MUST match exactly
+    credentials: true, // Required to allow cookies
+  })
+);
 
 // app.use(cors({ credentials: true }));
 app.use(cookieParser());
