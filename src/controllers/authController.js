@@ -98,13 +98,13 @@ const userLogin = async (req, res) => {
     //   sameSite: process.env.node_env === "production" ? "none" : "strict",
     //   maxAge: 7 * 24 * 60 * 60 * 1000,
     // });
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true, // since you're on HTTPS
-      sameSite: "none", // cross-origin
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-    return res.json({ success: true, message: "true" });
+    // res.cookie("token", token, {
+    //   httpOnly: true,
+    //   secure: true, // since you're on HTTPS
+    //   sameSite: "none", // cross-origin
+    //   maxAge: 7 * 24 * 60 * 60 * 1000,
+    // });
+    return res.json({ success: true, message: "true", token });
   } catch (error) {
     return res.json({ success: false, message: error.message });
   }
@@ -122,7 +122,7 @@ const userLogout = async (req, res) => {
       secure: true,
       sameSite: "none",
     });
-    
+
     return res.json({ success: true, message: "Logout Successful" });
   } catch (error) {
     return res.json({ success: false, message: error.message });
