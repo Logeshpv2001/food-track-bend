@@ -92,10 +92,16 @@ const userLogin = async (req, res) => {
       expiresIn: "7d",
     });
 
+    // res.cookie("token", token, {
+    //   httpOnly: true,
+    //   secure: process.env.node_env === "production",
+    //   sameSite: process.env.node_env === "production" ? "none" : "strict",
+    //   maxAge: 7 * 24 * 60 * 60 * 1000,
+    // });
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.node_env === "production",
-      sameSite: process.env.node_env === "production" ? "none" : "strict",
+      secure: true, // since you're on HTTPS
+      sameSite: "none", // cross-origin
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     return res.json({ success: true, message: "true" });
@@ -106,11 +112,17 @@ const userLogin = async (req, res) => {
 
 const userLogout = async (req, res) => {
   try {
+    // res.clearCookie("token", {
+    //   secure: process.env.node_env === "production",
+    //   sameSite: process.env.node_env === "production" ? "none" : "strict",
+    //   maxAge: 7 * 24 * 60 * 60 * 1000,
+    // });
     res.clearCookie("token", {
-      secure: process.env.node_env === "production",
-      sameSite: process.env.node_env === "production" ? "none" : "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
     });
+    
     return res.json({ success: true, message: "Logout Successful" });
   } catch (error) {
     return res.json({ success: false, message: error.message });
