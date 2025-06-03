@@ -17,14 +17,19 @@ const verifyUser = require("./src/middleware/verifyUser");
 //   credentials: true, // Allow sending cookies and authorization headers
 // };
 
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL, // MUST match exactly
-    credentials: true, // Required to allow cookies
-  })
-);
+// app.use(
+//   cors({
+//     origin: process.env.FRONTEND_URL, // MUST match exactly
+//     credentials: true, // Required to allow cookies
+//   })
+// );
 
-// app.use(cors({ credentials: true }));
+// const allowedOrigins = ["http://localhost:5174"];
+
+const allowedOrigins = ["https://mern-auth-lv.onrender.com"];
+
+app.use(cors({ origin: allowedOrigins, credentials: true }));
+
 app.use(cookieParser());
 
 app.use(express.json());

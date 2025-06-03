@@ -3,13 +3,21 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const transporter = require("../config/nodemailer");
 require("dotenv").config();
+const {
+  EMAIL_VERIFY_TEMPLATE,
+  PASSWORD_RESET_TEMPLATE,
+} = require("../config/emailTemplates");
 
 const userRegister = async (req, res) => {
   const { name, email, password, number, address } = req.body;
 
-  if ((!name, !email, !password, !number, !address)) {
+  // if ((!name, !email, !password, !number, !address)) {
+  //   return res.json({ success: false, message: "Missing required fields" });
+  // }
+  if ((!name, !email, !password)) {
     return res.json({ success: false, message: "Missing required fields" });
   }
+  console.log("Received register request:", req.body);
 
   try {
     const existingUser = await userModel.findOne({ email });
@@ -22,12 +30,12 @@ const userRegister = async (req, res) => {
       email,
       name,
       password: hashedPassword,
-      address,
-      number,
+      // address,
+      // number,
     });
 
     await user.save();
-
+    console.log("User created:", user);
     // jwt.sign(payload, secret, options)
 
     // jwt.sign()= > create a JWT (JSON Web Token).
@@ -62,12 +70,54 @@ const userRegister = async (req, res) => {
     return res.json({
       success: true,
       message: "User registered successfully",
-      token,
     });
   } catch (error) {
     return res.json({ success: false, message: error.message });
   }
 };
+
+// const userLogin = async (req, res) => {
+//   const { email, password } = req.body;
+//   if (!email || !password) {
+//     return res.json({
+//       success: false,
+//       message: "Email and Password is required",
+//     });
+//   }
+
+//   try {
+//     const user = await userModel.findOne({ email });
+//     if (!user) {
+//       return res.json({ success: false, message: "User not found" });
+//     }
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch) {
+//       return res.json({ success: false, message: "Invalid Password" });
+//     }
+
+//     const token = jwt.sign({ id: user._id }, process.env.jwt_secret, {
+//       expiresIn: "7d",
+//     });
+
+//     res.cookie("token", token, {
+//       httpOnly: true,
+//       secure: process.env.node_env === "production",
+//       sameSite: process.env.node_env === "production" ? "none" : "strict",
+//       maxAge: 7 * 24 * 60 * 60 * 1000,
+//     });
+
+//     const { userData } = user._doc;
+//     // res.cookie("token", token, {
+//     //   httpOnly: true,
+//     //   secure: true, // since you're on HTTPS
+//     //   sameSite: "none", // cross-origin
+//     //   maxAge: 7 * 24 * 60 * 60 * 1000,
+//     // });
+//     return res.json({ success: true, message: "true", user: userData });
+//   } catch (error) {
+//     return res.json({ success: false, message: error.message });
+//   }
+// };
 
 const userLogin = async (req, res) => {
   const { email, password } = req.body;
@@ -83,6 +133,7 @@ const userLogin = async (req, res) => {
     if (!user) {
       return res.json({ success: false, message: "User not found" });
     }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.json({ success: false, message: "Invalid Password" });
@@ -92,19 +143,21 @@ const userLogin = async (req, res) => {
       expiresIn: "7d",
     });
 
-    // res.cookie("token", token, {
-    //   httpOnly: true,
-    //   secure: process.env.node_env === "production",
-    //   sameSite: process.env.node_env === "production" ? "none" : "strict",
-    //   maxAge: 7 * 24 * 60 * 60 * 1000,
-    // });
-    // res.cookie("token", token, {
-    //   httpOnly: true,
-    //   secure: true, // since you're on HTTPS
-    //   sameSite: "none", // cross-origin
-    //   maxAge: 7 * 24 * 60 * 60 * 1000,
-    // });
-    return res.json({ success: true, message: "true", token });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.node_env === "production",
+      sameSite: process.env.node_env === "production" ? "none" : "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    // Exclude password from the user object
+    const { password: _, ...userData } = user._doc;
+
+    return res.json({
+      success: true,
+      message: "Login successful",
+      user: userData,
+    });
   } catch (error) {
     return res.json({ success: false, message: error.message });
   }
@@ -112,16 +165,16 @@ const userLogin = async (req, res) => {
 
 const userLogout = async (req, res) => {
   try {
-    // res.clearCookie("token", {
-    //   secure: process.env.node_env === "production",
-    //   sameSite: process.env.node_env === "production" ? "none" : "strict",
-    //   maxAge: 7 * 24 * 60 * 60 * 1000,
-    // });
     res.clearCookie("token", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: process.env.node_env === "production",
+      sameSite: process.env.node_env === "production" ? "none" : "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+    // res.clearCookie("token", {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: "none",
+    // });
 
     return res.json({ success: true, message: "Logout Successful" });
   } catch (error) {
@@ -154,7 +207,11 @@ const sendVerifyOtp = async (req, res) => {
       from: process.env.SENDER_EMAIL,
       to: user.email,
       subject: "Verify Email Otp",
-      text: `Your acoount verify otp is ${otp}`,
+      // text: `Your acoount verify otp is ${otp}`,
+      html: EMAIL_VERIFY_TEMPLATE.replace("{{otp}}", otp).replace(
+        "{{email}}",
+        user.email
+      ),
     };
 
     await transporter.sendMail(mailoption);
@@ -235,14 +292,18 @@ const sendResetOtp = async (req, res) => {
       from: process.env.SENDER_EMAIL,
       to: user.email,
       subject: "Reset Email Otp",
-      text: `Your acoount Reset otp is ${otp}`,
+      // text: `Your acoount Reset otp is ${otp}`,
+      html: PASSWORD_RESET_TEMPLATE.replace("{{otp}}", otp).replace(
+        "{{email}}",
+        user.email
+      ),
     };
 
     await transporter.sendMail(mailoption);
 
     return res.json({ success: true, message: "Reset Otp sent Successfully" });
   } catch (error) {
-    return res.josn({
+    return res.json({
       success: false,
       message: error.message,
     });
@@ -250,8 +311,8 @@ const sendResetOtp = async (req, res) => {
 };
 
 const resetPassword = async (req, res) => {
-  const { email, otp, newpassword } = req.body;
-  if (!email || !otp || !newpassword) {
+  const { email, otp, password } = req.body;
+  if (!email || !otp || !password) {
     res.json({
       success: false,
       message: "Missing Required Fields",
@@ -281,7 +342,7 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    const hashedPassword = await bcrypt.hash(newpassword, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     (user.password = hashedPassword),
       (user.resetotp = ""),
