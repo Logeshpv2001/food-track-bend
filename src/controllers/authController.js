@@ -8,8 +8,6 @@ const {
   PASSWORD_RESET_TEMPLATE,
 } = require("../config/emailTemplates");
 
-const logo = require("../../assests/logo.png");
-
 const userRegister = async (req, res) => {
   const { name, email, password, number, address } = req.body;
 
@@ -67,7 +65,7 @@ const userRegister = async (req, res) => {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
           <div style="text-align: center;">
-            <img src=${logo} alt="MERN Logo" width="120" style="margin-bottom: 20px;" />
+            <img src="https://ibb.co/1tDbt71G" alt="MERN Logo" width="120" style="margin-bottom: 20px;" />
           </div>
           <h2 style="color: #2c3e50;">Welcome to LV's Mern-Stack-Authentication</h2>
           <p>Hi <strong>${name}</strong>,</p>
