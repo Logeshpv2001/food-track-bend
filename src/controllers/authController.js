@@ -61,9 +61,22 @@ const userRegister = async (req, res) => {
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: email,
-      subject: "Welcome to LV's Food Track",
-      text: `Welcome to LV's Food Track ${name}. Your Account has been created with email id: ${email} `,
+      subject: "Welcome to LV's Mern-Stack-Authentication",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+          <div style="text-align: center;">
+            <img src="https://i.ibb.co/PhWMdkY/mern-logo.png" alt="MERN Logo" width="120" style="margin-bottom: 20px;" />
+          </div>
+          <h2 style="color: #2c3e50;">Welcome to LV's Mern-Stack-Authentication</h2>
+          <p>Hi <strong>${name}</strong>,</p>
+          <p>Thank you for registering with us! Your account has been successfully created using the email: <strong>${email}</strong>.</p>
+          <p>We're excited to have you on board. If you have any questions, feel free to reach out to our support team.</p>
+          <hr style="margin: 30px 0;" />
+          <p style="font-size: 12px; color: #999;">&copy; ${new Date().getFullYear()} LV's Mern-Stack-Authentication. All rights reserved.</p>
+        </div>
+      `,
     };
+    
 
     await transporter.sendMail(mailOptions);
 
